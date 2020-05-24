@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.13.0",
     "@material-ui/core": "^4.9.14",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.53",
@@ -15,9 +16,11 @@
     "@types/react-dom": "^16.9.0",
     "classnames": "^2.2.6",
     "file-saver": "^2.0.2",
+    "firebase": "^7.14.4",
     "print-js": "^1.0.63",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-firebase-hooks": "^2.1.1",
     "react-html-table-to-excel": "^2.0.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
@@ -28,7 +31,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "firebase:serve:front": "firebase serve --only hosting",
+    "firebase:deploy:front": "firebase deploy --only hosting"
   },
   "eslintConfig": {
     "extends": "react-app"

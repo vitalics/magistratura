@@ -5,18 +5,19 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
+import GoogleTranslateIcon from '@material-ui/icons/GTranslate';
+
 import Alert from '@material-ui/lab/Alert';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { SignIn as User } from '../types/auth';
-import { signIn, isSignedIn } from '../services/auth';
+import { useAuthState } from 'react-firebase-hooks/auth';
+
+import { auth, signInWithGoogle } from '../firebase';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -37,6 +38,9 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  provider: {
+    width: '100%',
+  },
 }));
 
 
@@ -49,25 +53,30 @@ export default function SignIn() {
 
   const history = useHistory();
 
-  const handleSignIn = React.useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    // prevent form subscribe
+  const [user] = useAuthState(auth);
+
+  const handleSignIn = React.useCallback(async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    // prevent form 
     e.preventDefault();
+
     setError('');
 
-    const info: User = {
-      email,
-      password,
-    };
     try {
-      signIn(info);
-
-      history.push('/');
+      await auth.signInWithEmailAndPassword(email, password);
     } catch (e) {
       setError(e.message);
     }
-  }, [email, password, history]);
+  }, [email, password]);
 
-  if (isSignedIn()) {
+  const handleGoogleSignIn = React.useCallback(async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    await signInWithGoogle();
+  }, []);
+
+  const handleEmail = React.useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEmail(e.target.value);
+  }, []);
+
+  if (user) {
     history.push('/');
   }
 
@@ -82,7 +91,7 @@ export default function SignIn() {
           <Typography component="h1" variant="h5">
             Sign in
         </Typography>
-          <form className={classes.form} noValidate>
+          <form className={classes.form}>
             <TextField
               variant="outlined"
               margin="normal"
@@ -95,7 +104,7 @@ export default function SignIn() {
               autoComplete="email"
               autoFocus
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={handleEmail}
             />
             <TextField
               variant="outlined"
@@ -109,10 +118,6 @@ export default function SignIn() {
               autoComplete="current-password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-            />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
             />
             <Button
               type="submit"
@@ -129,6 +134,12 @@ export default function SignIn() {
               <Alert severity="error">{error}</Alert>
             }
 
+            <div>
+              <Button className={classes.provider} onClick={handleGoogleSignIn}>
+                Sign in with google 
+                  <GoogleTranslateIcon />
+              </Button>
+            </div>
             <Grid container>
               <Grid item xs>
                 <Link href="#" variant="body2">
@@ -140,6 +151,7 @@ export default function SignIn() {
                   Don't have an account? Sign Up
               </Link>
               </Grid>
+
             </Grid>
           </form>
         </div>

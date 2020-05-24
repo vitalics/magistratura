@@ -9,14 +9,16 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
 import ExportTable from './export';
-import Header from './header';
 import { Container } from '@material-ui/core';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
+  root: {
+    marginTop: theme.spacing(5)
+  },
   table: {
     minWidth: 650,
   },
-});
+}));
 
 function createData(name: string, calories: number, fat: number, carbs: number, protein: number) {
   return { name, calories, fat, carbs, protein };
@@ -32,46 +34,39 @@ const rows = [
 export default function CapacityTable() {
   const classes = useStyles();
   const tableRef = useRef<HTMLTableElement>(null);
-  const [isSideMenuOpen, setSideMenuOpen] = React.useState(false);
-
-  const handleMenuToggle = React.useCallback(() => {
-    setSideMenuOpen(!isSideMenuOpen);
-  }, [setSideMenuOpen, isSideMenuOpen]);
 
   return (
-    <>
-      <Header onMenuToggle={handleMenuToggle} />
-
-      <Container >
-        <TableContainer component={Paper} ref={tableRef}>
-          <Table className={classes.table} id='table' aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>ФИО</TableCell>
-                <TableCell align="center">Уч. практика</TableCell>
-                <TableCell align="center">Производственная практика</TableCell>
-                <TableCell align="center">Аспирантура</TableCell>
-                <TableCell align="center">Итого</TableCell>
+    <Container fixed maxWidth="md" classes={{
+      root: classes.root
+    }} >
+      <TableContainer component={Paper} ref={tableRef}>
+        <Table id='table' aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell>ФИО</TableCell>
+              <TableCell align="center">Уч. практика</TableCell>
+              <TableCell align="center">Производственная практика</TableCell>
+              <TableCell align="center">Аспирантура</TableCell>
+              <TableCell align="center">Итого</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows.map(row => (
+              <TableRow key={row.name}>
+                <TableCell component="th" scope="row">
+                  {row.name}
+                </TableCell>
+                <TableCell align="center">{row.calories}</TableCell>
+                <TableCell align="center">{row.fat}</TableCell>
+                <TableCell align="center">{row.carbs}</TableCell>
+                <TableCell align="center">{row.protein}</TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map(row => (
-                <TableRow key={row.name}>
-                  <TableCell component="th" scope="row">
-                    {row.name}
-                  </TableCell>
-                  <TableCell align="center">{row.calories}</TableCell>
-                  <TableCell align="center">{row.fat}</TableCell>
-                  <TableCell align="center">{row.carbs}</TableCell>
-                  <TableCell align="center">{row.protein}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-        <ExportTable filename='temp' sheet='sheet1' tableRef={tableRef}>Dowload me</ExportTable>
-      </Container>
-    </>
+      <ExportTable filename='temp' sheet='sheet1' tableRef={tableRef}>Dowload me</ExportTable>
+    </Container>
   );
 }

@@ -6,8 +6,6 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
@@ -16,9 +14,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Alert from '@material-ui/lab/Alert';
 
-import { SignUp as User } from '../types/auth';
-import { signUp } from '../services/auth'
-
+import { auth } from '../firebase';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -50,24 +46,21 @@ export default function SignUp() {
 
   const history = useHistory();
 
-  const handleSignUp = React.useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSignUp = React.useCallback(async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
     setError('');
 
-    const user: User = {
-      firstname,
-      lastname,
-      email,
-      password,
-    };
-
     try {
-      signUp(user);
+      await auth.createUserWithEmailAndPassword(email, password);
+      await auth.signInWithEmailAndPassword(email, password);
+      await auth.updateCurrentUser({
+        ...auth.currentUser!,
+        displayName: `${firstname} ${lastname}`
+      });
       history.push('/');
     } catch (e) {
       setError(e.message);
     }
-
-
   }, [firstname, lastname, email, password, history])
 
   return (
@@ -136,12 +129,6 @@ export default function SignUp() {
                   autoComplete="current-password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={<Checkbox value="allowExtraEmails" color="primary" />}
-                  label="I want to receive inspiration, marketing promotions and updates via email."
                 />
               </Grid>
             </Grid>

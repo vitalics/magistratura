@@ -5,13 +5,12 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import { signOut } from '../services/auth';
+import { auth } from '../firebase';
 
 export default function AuthIcon() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = !!anchorEl;
   const history = useHistory();
-
 
   const handleMenu = React.useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
@@ -23,12 +22,17 @@ export default function AuthIcon() {
       setAnchorEl(null);
     }, [setAnchorEl]);
 
-  const handleSignOut = React.useCallback(() => {
-    signOut();
+    const handleProfile = React.useCallback(
+      () => {
+        setAnchorEl(null);
+        history.push('/profile');
+      }, [setAnchorEl, history]);
+
+  const handleSignOut = React.useCallback(async () => {
+    await auth.signOut();
     setAnchorEl(null);
 
-    history.push('/');
-
+    history.push('/sign-in');
   }, [setAnchorEl, history])
 
   return (
@@ -57,7 +61,7 @@ export default function AuthIcon() {
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={handleClose}>Profile</MenuItem>
+        <MenuItem onClick={handleProfile}>Profile</MenuItem>
         <MenuItem onClick={handleClose}>My account</MenuItem>
         <MenuItem onClick={handleSignOut}>SignOut</MenuItem>
       </Menu>
