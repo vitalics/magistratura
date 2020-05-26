@@ -1,3 +1,5 @@
+// @ts-nocheck
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as functions from 'firebase-functions';
 
 // // Start writing Firebase Functions

@@ -1,6 +1,15 @@
-import firebase from "firebase/app";
-import "firebase/auth";
+import * as firebase from "firebase/app";
+import 'firebase/auth';
+import 'firebase/analytics';
 import "firebase/firestore";
+import 'firebase/storage';
+
+
+import { DBUser } from "./types/auth";
+import { setItem, getItem, removeItem } from "./utils/localstorage";
+import { assertEqual } from "./utils/assert";
+import { getHalfYear } from "./utils/date";
+import { DocContentTypes } from "./utils/docs";
 
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_API_KEY,
@@ -14,11 +23,103 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-export const auth = firebase.auth();
-export const firestore = firebase.firestore();
+const firestore = firebase.firestore();
 
-const googleProvider = new firebase.auth.GoogleAuthProvider();
+const storage = firebase.storage();
 
-export function signInWithGoogle(){
-    return auth.signInWithPopup(googleProvider);
+function getAnalytics() {
+    if (process.env.NODE_ENV === 'production') {
+        return firebase.analytics();
+    }
+    return null;
 }
+
+export async function signInWithEmailAndPassword(email: string, password: string) {
+    const entrypted = btoa(password);
+    getAnalytics()?.logEvent('login', { email, password });
+
+    let data: DBUser;
+    const doc = firestore.collection('/users').doc(email);
+    const snapshot = await doc.get();
+    data = snapshot.data() as DBUser;
+
+    if (!data) {
+        throw new Error('cannot sign-in non existed user');
+    }
+    if (data.password !== entrypted) {
+        throw new Error('password is incorrect');
+    }
+
+    await doc.update({ lastLoginAt: Date.now() });
+
+    setItem('user', data, JSON.stringify);
+
+    return data as DBUser || null;
+}
+
+export async function createUserWithEmailAndPassword(user: DBUser) {
+    const encrypted = btoa(user.password);
+    getAnalytics()?.logEvent('sign_up', user);
+    const doc = firestore.collection('/users').doc(user.email);
+    const snapshot = await doc.get();
+    if (snapshot.exists) {
+        throw new Error('cannot create an existed user');
+    } else {
+        await doc.set({ ...user, password: encrypted });
+    }
+}
+
+export async function getCurrentUser(): Promise<DBUser | null> {
+    const item = getItem<DBUser>('user', JSON.parse);
+    if (!item) {
+        throw new Error('cannot get non-authorized user');
+    }
+    const doc = firestore.collection('/users').doc(item.email);
+    const snapshot = await doc.get();
+    const snapshotValue = snapshot.data() as DBUser;
+
+    try {
+        assertEqual(item, snapshotValue);
+    } finally {
+        setItem('user', snapshotValue, JSON.stringify);
+    }
+    return snapshotValue;
+}
+
+export async function updateUserProfile(user: DBUser) {
+    setItem('user', user, JSON.stringify);
+    const doc = firestore.collection('/users').doc(user.email);
+    await doc.set(user, { merge: true });
+}
+
+export function signOut() {
+    removeItem('user');
+}
+
+export async function saveXlsx(data: Blob | Uint8Array | ArrayBuffer) {
+    const now = new Date();
+
+    const halfYear = getHalfYear(now);
+    const loadRef = storage.ref(`${now.getFullYear()}/${halfYear}/load.xlsx`);
+    const snapshot = await loadRef.put(data, { contentType: DocContentTypes.xlsx });
+    console.dir('save to cloud', snapshot);
+}
+
+export async function getCurrentXlsx() {
+    const now = new Date();
+
+    const halfYear = getHalfYear(now);
+
+    const ref = storage.ref(`${now.getFullYear()}/${halfYear}/load.xlsx`);
+    const url: string = await ref.getDownloadURL();
+
+    console.log('getCurrentXlsx', url)
+
+    const data = await fetch(url, {
+        method: "GET",
+        mode: 'no-cors'
+    });
+    const blob = await data.blob();
+    return blob;
+}
+

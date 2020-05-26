@@ -10,14 +10,15 @@ import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-import GoogleTranslateIcon from '@material-ui/icons/GTranslate';
 
 import Alert from '@material-ui/lab/Alert';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { useAuthState } from 'react-firebase-hooks/auth';
 
-import { auth, signInWithGoogle } from '../firebase';
+import { signInWithEmailAndPassword } from '../firebase';
+
+import * as ROUTES from '../routes';
+import { useAuth } from '../hooks/auth';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -45,15 +46,21 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-export default function SignIn() {
+export default React.memo(() => {
   const classes = useStyles();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState('');
 
+  const { user } = useAuth();
+
   const history = useHistory();
 
-  const [user] = useAuthState(auth);
+  React.useEffect(() => {
+    if (user) {
+      history.push(ROUTES.HOME);
+    }
+  });
 
   const handleSignIn = React.useCallback(async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     // prevent form 
@@ -62,23 +69,16 @@ export default function SignIn() {
     setError('');
 
     try {
-      await auth.signInWithEmailAndPassword(email, password);
+      await signInWithEmailAndPassword(email, password);
+      history.push(ROUTES.HOME);
     } catch (e) {
       setError(e.message);
     }
-  }, [email, password]);
-
-  const handleGoogleSignIn = React.useCallback(async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    await signInWithGoogle();
-  }, []);
+  }, [email, password, history]);
 
   const handleEmail = React.useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setEmail(e.target.value);
   }, []);
-
-  if (user) {
-    history.push('/');
-  }
 
   return (
     <>
@@ -134,12 +134,12 @@ export default function SignIn() {
               <Alert severity="error">{error}</Alert>
             }
 
-            <div>
+            {/* <div>
               <Button className={classes.provider} onClick={handleGoogleSignIn}>
-                Sign in with google 
-                  <GoogleTranslateIcon />
+                Sign in with google
+                  <img src="https://www.gstatic.com/mobilesdk/160512_mobilesdk/auth_service_google.svg" alt="google" />
               </Button>
-            </div>
+            </div> */}
             <Grid container>
               <Grid item xs>
                 <Link href="#" variant="body2">
@@ -158,4 +158,4 @@ export default function SignIn() {
       </Container>
     </>
   );
-}
+});

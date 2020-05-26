@@ -44,13 +44,18 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function Header() {
+type Props = {
+  withDrawer?: boolean;
+  title?: string;
+};
+
+export default React.memo(({ withDrawer, title }: Props) => {
   const classes = useStyles();
   const [isOpen, setOpen] = React.useState(false);
 
   const handleMenu = React.useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    setOpen(!isOpen);
-  }, [setOpen, isOpen]);
+    withDrawer ?? setOpen(!isOpen);
+  }, [setOpen, isOpen, withDrawer]);
 
   return (
     <>
@@ -66,7 +71,7 @@ export default function Header() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" className={classes.title}>
-            Расчет нагрузки
+            {title ?? 'Расчет нагрузки'}
           </Typography>
           <AuthIcon />
         </Toolbar>
@@ -85,4 +90,4 @@ export default function Header() {
     </Drawer>
     </>
   );
-}
+});

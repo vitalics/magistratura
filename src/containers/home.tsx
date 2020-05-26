@@ -1,11 +1,14 @@
 import React from 'react';
+
 import Header from '../components/menu';
 import CapacityTable from '../components/capacitytable';
-export default function Home() {
+import Table from '../components/xlsx/table';
+export default React.memo(() => {
     return (
         <>
             <Header />
             <CapacityTable />
+            <Table />
         </>
     );
-}
+});

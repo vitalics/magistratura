@@ -1,17 +1,17 @@
 import React from "react";
-import { Route } from "react-router-dom";
-import SignIn from '../containers/signIn'
+import { Route, Redirect } from "react-router-dom";
 
-import {User} from 'firebase';
+import { DBUser } from "../types/auth";
+import * as ROUTES from '../routes';
 
-export default function AuthGuardedRoute(user: null | User | undefined): (Component: any, ...rest: any[]) => JSX.Element {
-    return function ({ component: Component, ...rest }): JSX.Element {
-        console.dir(user);
+export default function AuthRoute(user: DBUser | null | undefined) {
+    return function ({ component: Component, ...rest }: { component: any, rest: any[] } | any): JSX.Element {
         return (
             <Route
                 {...rest}
-                render={props => (!!user ? <Component {...props} /> : <SignIn />)}
+                render={props => (!!user ? <Component {...props} /> : <Redirect to={ROUTES.SIGN_IN} />)}
             />
+
         );
     };
 }

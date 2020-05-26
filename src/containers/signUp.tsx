@@ -14,7 +14,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Alert from '@material-ui/lab/Alert';
 
-import { auth } from '../firebase';
+import { createUserWithEmailAndPassword } from '../firebase';
+import routes from '../routes';
+import { useAuth } from '../hooks/auth';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -36,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SignUp() {
+export default React.memo(() => {
   const classes = useStyles();
   const [firstname, setFirstname] = React.useState('');
   const [lastname, setLastname] = React.useState('');
@@ -46,117 +48,129 @@ export default function SignUp() {
 
   const history = useHistory();
 
+  const { user } = useAuth();
+
+  React.useEffect(() => {
+    if (user) {
+      history.push(routes.MAIN);
+    }
+  });
+
   const handleSignUp = React.useCallback(async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     setError('');
 
-    try {
-      await auth.createUserWithEmailAndPassword(email, password);
-      await auth.signInWithEmailAndPassword(email, password);
-      await auth.updateCurrentUser({
-        ...auth.currentUser!,
-        displayName: `${firstname} ${lastname}`
-      });
-      history.push('/');
-    } catch (e) {
-      setError(e.message);
+    if (!firstname) {
+      const err = new Error('fistname field is required');
+      setError(err.message);
+      throw err;
     }
+    if (!lastname){
+      const err = new Error('lastname field is required');
+      setError(err.message);
+      throw err;
+    }
+
+      try {
+        await createUserWithEmailAndPassword({ firstname, lastname, lastLoginAt: Date.now(), email, dateOfBirth: null, phone: null, role: 'teacher', skype: null, photoUrl: null, password })
+        history.push('/');
+      } catch (e) {
+        setError(e.message);
+      }
   }, [firstname, lastname, email, password, history])
 
   return (
-    <>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign up
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.paper}>
+        <Avatar className={classes.avatar}>
+          <LockOutlinedIcon />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          Sign up
         </Typography>
-          <form className={classes.form} noValidate>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="fname"
-                  name="firstName"
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                  autoFocus
-                  value={firstname}
-                  onChange={e => setFirstname(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="lname"
-                  value={lastname}
-                  onChange={e => setLastname(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                />
-              </Grid>
+        <form className={classes.form} noValidate>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                autoComplete="fname"
+                name="firstName"
+                variant="outlined"
+                required
+                fullWidth
+                id="firstName"
+                label="First Name"
+                autoFocus
+                value={firstname}
+                onChange={e => setFirstname(e.target.value)}
+              />
             </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                variant="outlined"
+                required
+                fullWidth
+                id="lastName"
+                label="Last Name"
+                name="lastName"
+                autoComplete="lname"
+                value={lastname}
+                onChange={e => setLastname(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+            </Grid>
+          </Grid>
 
-            {error &&
-              <Alert severity="error">{error}</Alert>
-            }
+          {error &&
+            <Alert severity="error">{error}</Alert>
+          }
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-              onClick={handleSignUp}
-            >
-              Sign Up
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+            onClick={handleSignUp}
+          >
+            Sign Up
           </Button>
-            <Grid container justify="flex-end">
-              <Grid item>
-                <Link href="/sign-in" variant="body2">
-                  Already have an account? Sign in
+          <Grid container justify="flex-end">
+            <Grid item>
+              <Link href={routes.SIGN_UP} variant="body2">
+                Already have an account? Sign in
               </Link>
-              </Grid>
             </Grid>
-          </form>
-        </div>
-      </Container>
-    </>
+          </Grid>
+        </form>
+      </div>
+    </Container>
   );
-}
+});

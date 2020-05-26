@@ -8,8 +8,9 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
-import ExportTable from './export';
 import { Container } from '@material-ui/core';
+import Export from './xlsx/export';
+import SaveCloud from './xlsx/save';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -66,7 +67,9 @@ export default function CapacityTable() {
         </Table>
       </TableContainer>
 
-      <ExportTable filename='temp' sheet='sheet1' tableRef={tableRef}>Dowload me</ExportTable>
+      {/* <ExportTable filename='temp' sheet='sheet1' tableRef={tableRef}>Dowload me</ExportTable> */}
+      <Export table={tableRef} sheet="нагрузка" name='temp.xlsx'>Export</Export>
+      <SaveCloud table={tableRef} sheet="нагрузка" />
     </Container>
   );
 }
