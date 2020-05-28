@@ -1,9 +1,16 @@
 {
-    "Header.Profile": "Profile",
-    "Header.Load": "Load",
+    "Load": "Load",
+    "Profile": "Profile",
+    "Header.Profile": "$t(Profile)",
+    "Header.Load": "$t(Load)",
     "Lang.English": "English",
     "Lang.Russian": "Русский",
     "Personal.Chart.Load.Title": "Planned load by $t(HalfYear_interval, {'postprocess': 'interval'})",
     "Personal.Chart.Load.SubTitle": "Planned and fact load",
-    "HalfYear_interval": "(1){spring}; (2){fall}; "
+    "HalfYear_interval": "(1){spring}; (2){fall}; ",
+    "Sidebar.Load": "$t(Load)",
+    "Sidebar.Profile": "$t(Profile)",
+    "EBiblio": "E-Library",
+    "Personal Plan": "Personal plan",
+    "Usefull links": "Usefull links"
 }

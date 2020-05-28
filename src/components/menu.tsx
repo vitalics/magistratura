@@ -1,4 +1,6 @@
 import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -7,11 +9,25 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import MenuIcon from '@material-ui/icons/Menu'
 import Drawer from '@material-ui/core/Drawer';
-import Brightness4Icon from '@material-ui/icons/Brightness4';
-import classnames from 'classnames';
+import Divider from '@material-ui/core/Divider';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Collapse from '@material-ui/core/Collapse';
 
+import Brightness4Icon from '@material-ui/icons/Brightness4';
+import MailIcon from '@material-ui/icons/Mail';
+import TableChartIcon from '@material-ui/icons/TableChart';
+import PersonIcon from '@material-ui/icons/Person';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import LinkIcon from '@material-ui/icons/Link';
+import BookIcon from '@material-ui/icons/MenuBook';
+import AssessmentIcon from '@material-ui/icons/Assessment';
+
+import classnames from 'classnames';
 import AuthIcon from './authIcon';
-import { useTranslation } from 'react-i18next';
 import LanguadgeSelector from './languadge/selector';
 import { setItem, getItem } from '../utils/localstorage';
 
@@ -28,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
   drawerPaper: {
     position: 'relative',
     whiteSpace: 'nowrap',
-    width: 220,
+    width: 260,
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -48,7 +64,21 @@ const useStyles = makeStyles((theme) => ({
   },
   brightnessIcon: {
     color: theme.palette.primary.contrastText
-  }
+  },
+  toolbar: theme.mixins.toolbar,
+  toolbarImage: {
+    width: '50%',
+    display: 'block',
+    margin: '0 auto',
+    padding: theme.spacing(2),
+  },
+  heading: {
+    fontSize: theme.typography.pxToRem(15),
+    fontWeight: theme.typography.fontWeightRegular,
+  },
+  nested: {
+    paddingLeft: theme.spacing(4),
+  },
 }));
 
 type Props = {
@@ -60,8 +90,10 @@ type Props = {
 export default React.memo(({ withDrawer, title, onThemeChanged }: Props) => {
   const classes = useStyles();
   const [isOpen, setOpen] = React.useState(false);
+  const [isExpandUsefull, setExpandUsefull] = React.useState(false);
 
   const { t } = useTranslation();
+  const history = useHistory();
 
   const handleMenu = React.useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     withDrawer ?? setOpen(!isOpen);
@@ -74,6 +106,9 @@ export default React.memo(({ withDrawer, title, onThemeChanged }: Props) => {
     onThemeChanged && onThemeChanged(newTheme);
   }, [onThemeChanged]);
 
+  const handleExpandUsefullClick = () => {
+    setExpandUsefull(!isExpandUsefull);
+  };
   return (
     <>
       <AppBar position={'sticky'}>
@@ -110,8 +145,52 @@ export default React.memo(({ withDrawer, title, onThemeChanged }: Props) => {
         }}
         onClose={(e, reason) => setOpen(false)}
       >
-        Item
-    </Drawer>
+        <div className={classes.toolbar}>
+          <img className={classes.toolbarImage} src="http://cdn.bru.by/cache/images/design/herb4.png" alt='BRU' />
+        </div>
+        <Divider />
+        <List>
+          {['Profile', 'Load', 'Personal Plan', 'Drafts'].map((text, index) => (
+            <ListItem button key={text} onClick={e => history.push(`${text.split(' ').join('_').toLowerCase()}`)}>
+              <ListItemIcon>{getIconByIndex(index)}</ListItemIcon>
+              <ListItemText primary={t(text)} />
+            </ListItem>
+          ))}
+          {/* Usefull Links */}
+          <Divider />
+          <ListItem button onClick={handleExpandUsefullClick}>
+            <ListItemIcon>
+              <LinkIcon />
+            </ListItemIcon>
+            <ListItemText primary={t('Usefull links')} />
+            {isExpandUsefull ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          </ListItem>
+          <Collapse in={isExpandUsefull} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItem button className={classes.nested} onClick={e => window.open('http://e.biblio.bru.by/', '_blank')?.focus()}>
+                <ListItemIcon>
+                  <BookIcon />
+                </ListItemIcon>
+                <ListItemText primary={t('EBiblio')} />
+              </ListItem>
+            </List>
+          </Collapse>
+        </List>
+        <Divider />
+      </Drawer>
     </>
   );
 });
+
+function getIconByIndex(index: number) {
+  switch (index) {
+    case 0:
+      return (<PersonIcon />);
+    case 1:
+      return (<TableChartIcon />);
+    case 2:
+      return (<AssessmentIcon />);
+    default:
+      return (<MailIcon />);
+  }
+}

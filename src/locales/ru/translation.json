@@ -1,9 +1,16 @@
 {
-    "Header.Profile": "Профиль",
-    "Header.Load": "Нагрузка",
+    "Load": "Нагрузка",
+    "Profile": "Профиль",
+    "Header.Profile": "$t(Profile)",
+    "Header.Load": "$t(Load)",
     "Lang.English": "English",
     "Lang.Russian": "Русский",
     "Personal.Chart.Load.Title": "Плановая нагрузка за $t(HalfYear_interval, {'postprocess': 'interval', 'count': {{halfYear}} })",
     "Personal.Chart.Load.SubTitle": "Плановая и фактическая нагрузка",
-    "HalfYear_interval": "(1){весенний семестр};(2){осенний семестр};"
+    "HalfYear_interval": "(1){весенний семестр};(2){осенний семестр};",
+    "Sidebar.Load": "$t(Load)",
+    "Sidebar.Profile": "$t(Profile)",
+    "EBiblio": "Эл. библиотека",
+    "Personal Plan": "Персональный план",
+    "Usefull links": "Полезные ссылки"
 }
