@@ -2,6 +2,7 @@ enum HalfYear {
     fall = 'fall', // осенний
     spring = 'spring', // весенний
 }
+
 export function getHalfYear(date: Date): HalfYear {
     let halfYear: HalfYear;
     switch (date.getMonth()) {
@@ -25,4 +26,13 @@ export function getHalfYear(date: Date): HalfYear {
             break;
     }
     return halfYear!;
+}
+export function getHalfYearAsNumber(date:Date){
+    const value = getHalfYear(date);
+    if(value === HalfYear.fall){
+        return 1;
+    }
+    if(value === HalfYear.spring){
+        return 2;
+    }
 }

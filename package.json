@@ -21,15 +21,20 @@
     "date-fns": "^2.14.0",
     "file-saver": "^2.0.2",
     "firebase": "^7.14.4",
+    "i18next": "^19.4.5",
+    "i18next-browser-languagedetector": "^4.2.0",
+    "i18next-http-backend": "^1.0.12",
     "print-js": "^1.0.63",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-firebase-hooks": "^2.1.1",
     "react-google-charts": "^3.0.15",
     "react-html-table-to-excel": "^2.0.0",
+    "react-i18next": "^11.5.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
     "typescript": "~3.7.2",
+    "uuid": "^8.1.0",
     "xlsx": "^0.15.6"
   },
   "scripts": {
@@ -60,6 +65,7 @@
   "devDependencies": {
     "@types/classnames": "^2.2.10",
     "@types/file-saver": "^2.0.1",
-    "@types/react-router-dom": "^5.1.5"
+    "@types/react-router-dom": "^5.1.5",
+    "@types/uuid": "^8.0.0"
   }
 }

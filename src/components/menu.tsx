@@ -7,9 +7,13 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import MenuIcon from '@material-ui/icons/Menu'
 import Drawer from '@material-ui/core/Drawer';
+import Brightness4Icon from '@material-ui/icons/Brightness4';
 import classnames from 'classnames';
 
 import AuthIcon from './authIcon';
+import { useTranslation } from 'react-i18next';
+import LanguadgeSelector from './languadge/selector';
+import { setItem, getItem } from '../utils/localstorage';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,21 +45,34 @@ const useStyles = makeStyles((theme) => ({
   docked: {
     height: `calc(100vh - 64px)`,
     position: 'absolute',
+  },
+  brightnessIcon: {
+    color: theme.palette.primary.contrastText
   }
 }));
 
 type Props = {
   withDrawer?: boolean;
   title?: string;
+  onThemeChanged?: (type: 'dark' | 'light') => void
 };
 
-export default React.memo(({ withDrawer, title }: Props) => {
+export default React.memo(({ withDrawer, title, onThemeChanged }: Props) => {
   const classes = useStyles();
   const [isOpen, setOpen] = React.useState(false);
+
+  const { t } = useTranslation();
 
   const handleMenu = React.useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     withDrawer ?? setOpen(!isOpen);
   }, [setOpen, isOpen, withDrawer]);
+
+  const handleTheme = React.useCallback(() => {
+    const currentTheme: 'dark' | 'light' = getItem('theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light'
+    setItem('theme', newTheme, undefined);
+    onThemeChanged && onThemeChanged(newTheme);
+  }, [onThemeChanged]);
 
   return (
     <>
@@ -71,8 +88,15 @@ export default React.memo(({ withDrawer, title }: Props) => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" className={classes.title}>
-            {title ?? 'Расчет нагрузки'}
+            {title ?? t('Header.Load')}
           </Typography>
+          <LanguadgeSelector />
+          {/* theme switch */}
+          <IconButton
+            classes={{ root: classes.brightnessIcon }}
+            aria-label="delete" onClick={handleTheme}>
+            <Brightness4Icon />
+          </IconButton>
           <AuthIcon />
         </Toolbar>
       </AppBar>

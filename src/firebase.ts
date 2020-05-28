@@ -70,20 +70,26 @@ export async function createUserWithEmailAndPassword(user: DBUser) {
 }
 
 export async function getCurrentUser(): Promise<DBUser | null> {
-    const item = getItem<DBUser>('user', JSON.parse);
+    const item = getItem<DBUser>('user', JSON.parse as (text: string) => any);
     if (!item) {
         throw new Error('cannot get non-authorized user');
     }
-    const doc = firestore.collection('/users').doc(item.email);
-    const snapshot = await doc.get();
-    const snapshotValue = snapshot.data() as DBUser;
+    let shanpshot: DBUser;
 
     try {
-        assertEqual(item, snapshotValue);
-    } finally {
-        setItem('user', snapshotValue, JSON.stringify);
+        const doc = firestore.collection('/users').doc(item.email);
+        const snapshot = await doc.get();
+        shanpshot = snapshot.data() as DBUser;
+    } catch (e) {
+
     }
-    return snapshotValue;
+
+    try {
+        assertEqual(item, shanpshot!);
+    } finally {
+        setItem('user', shanpshot!, JSON.stringify);
+    }
+    return item;
 }
 
 export async function updateUserProfile(user: DBUser) {
@@ -97,11 +103,16 @@ export function signOut() {
 }
 
 export async function saveXlsx(data: Blob | Uint8Array | ArrayBuffer) {
+    const currentUser = await getCurrentUser();
     const now = new Date();
 
     const halfYear = getHalfYear(now);
     const loadRef = storage.ref(`${now.getFullYear()}/${halfYear}/load.xlsx`);
-    const snapshot = await loadRef.put(data, { contentType: DocContentTypes.xlsx });
+    const snapshot = await loadRef.put(data, {
+        contentType: DocContentTypes.xlsx, customMetadata: {
+            lastUpdatedFrom: currentUser?.email!
+        }
+    });
     console.dir('save to cloud', snapshot);
 }
 

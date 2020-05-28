@@ -4,7 +4,7 @@ import XLSX from 'xlsx';
 import { getCurrentXlsx } from '../../firebase';
 
 type Props = {};
-export default function Table({ }: Props) {
+export default function Table(props: Props) {
     React.useEffect(() => {
         getCurrentXlsx().then(blob => {
             const wb = XLSX.read(blob, { type: 'buffer' });

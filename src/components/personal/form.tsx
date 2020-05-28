@@ -11,7 +11,7 @@ import { makeStyles } from '@material-ui/core';
 import fns from '@date-io/date-fns';
 
 import classnames from 'classnames';
-import { DBUser } from '../types/auth';
+import { DBUser } from '../../types/auth';
 
 const useStyles = makeStyles(theme => ({
     root: {

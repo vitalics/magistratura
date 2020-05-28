@@ -3,10 +3,14 @@ import React from 'react';
 import Header from '../components/menu';
 import CapacityTable from '../components/capacitytable';
 import Table from '../components/xlsx/table';
-export default React.memo(() => {
+
+type Props = {
+    onThemeChanged?: (themeType: 'dark' | 'light') => void;
+};
+export default React.memo(({ onThemeChanged }: Props) => {
     return (
         <>
-            <Header />
+            <Header onThemeChanged={onThemeChanged} />
             <CapacityTable />
             <Table />
         </>

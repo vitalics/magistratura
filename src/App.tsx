@@ -3,34 +3,56 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
+  Redirect,
 } from "react-router-dom";
 import '@fortawesome/fontawesome-free';
 
 import SignIn from './containers/signIn';
 import SignUp from './containers/signUp';
-import GetAuthRoute from './components/authRoute'
 import ProfileInfo from './containers/profile';
 import Home from './containers/home';
 
 import * as ROUTES from './routes';
 import { useAuth } from './hooks/auth';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { getItem } from './utils/localstorage';
+import { dark,  } from '@material-ui/core/styles/createPalette';
+
+const lightTheme = createMuiTheme();
+const darkTheme = createMuiTheme({
+  palette: {
+    ...dark
+  }
+});
 
 export default React.memo(() => {
   const { user } = useAuth();
+  const [themeType, setThemeType] = React.useState<'dark' | 'light'>('light')
 
-  const AuthRoute = GetAuthRoute(user)
+  React.useEffect(() => {
+    const theme = getItem<'dark' | 'light'>('theme');
+    setThemeType(theme || 'light');
+
+  }, [setThemeType]);
 
   return (
-    <div className="App">
-      <Router>
-        <Switch>
-          <Route path={ROUTES.SIGN_IN} component={SignIn} />
-          <Route path={ROUTES.SIGN_UP} component={SignUp} />
-          <AuthRoute path={ROUTES.HOME} component={Home} />
-          <AuthRoute path={ROUTES.PROFILE} component={ProfileInfo} />
-          <AuthRoute path={ROUTES.MAIN} component={Home} />
-        </Switch>
-      </Router>
-    </div>
+    <MuiThemeProvider theme={themeType === 'dark' ? darkTheme : lightTheme}>
+      <div className="App">
+        <Router>
+          <Switch>
+            <Route path={ROUTES.SIGN_IN} component={SignIn} />
+            <Route path={ROUTES.SIGN_UP} component={SignUp} />
+            {user ? <Route path={ROUTES.HOME} render={props => <Home onThemeChanged={type => setThemeType(type)} />} /> :
+              <Redirect to={ROUTES.SIGN_IN} />}
+            {user ? <Route path={ROUTES.PROFILE} render={props => <ProfileInfo onThemeChanged={newTheme => setThemeType(newTheme)} />} /> :
+              <Redirect to={ROUTES.SIGN_IN} />}
+            }
+            {user ? <Route path={ROUTES.MAIN} render={props => <Home onThemeChanged={type => setThemeType(type)} />} /> :
+              <Redirect to={ROUTES.SIGN_IN} />}
+            }
+          </Switch>
+        </Router>
+      </div>
+    </MuiThemeProvider>
   );
 });

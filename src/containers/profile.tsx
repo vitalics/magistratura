@@ -13,9 +13,10 @@ import { makeStyles } from '@material-ui/core';
 
 import Header from '../components/menu';
 import man from '../images/man.png'
-import PersonalForm from '../components/personalForm';
+import PersonalForm from '../components/personal/form';
 import { useAuth } from '../hooks/auth';
-import LoadChart from '../components/loadChard';
+import LoadChart from '../components/personal/loadChart';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,19 +49,23 @@ const useStyles = makeStyles((theme) => ({
     margin: `${theme.spacing(2)}px 0`,
   }
 }));
+type Props = {
+  onThemeChanged?: (themeType: 'dark' | 'light') => void;
+};
 
-export default React.memo(() => {
+export default function ProfileInfo({ onThemeChanged }: Props) {
   const classes = useStyles();
   const { user, loading } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <div className={classes.root}>
-      <Header title="Профиль" />
+      <Header title={t('Header.Profile')} onThemeChanged={onThemeChanged} />
       <Container fixed maxWidth="lg">
         {loading && <CircularProgress />}
         {user &&
           <Box display="flex">
-            <Grid xs={6} classes={{ "grid-xs-6": classes.item }}>
+            <Grid xs={6} classes={{ root: classes.item }}>
               <Paper className={classes.paper}>
                 <div className={classes.imageWrapper}>
                   <img className={classes.image} src={user.photoUrl ?? man} alt="man" />
@@ -85,4 +90,4 @@ export default React.memo(() => {
       </Container>
     </div>
   );
-});
+};

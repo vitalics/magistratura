@@ -1,13 +1,29 @@
-export function getItem<T>(key: string, transformer: (value: string) => T): T | null {
+export function getItem<T = string>(
+    key: string,
+    transformer?: TransformerToType<T>
+): null | T {
     const item = localStorage.getItem(key);
-    return item ? transformer(item) : null;
+    if (transformer) {
+        const transformed = item ? transformer(item) : null;
+        return transformed;
+    }
+    if(item === null){
+        return item;
+    }
+    if(typeof item !== 'string'){
+        throw new Error('cannot precess non string type without transformer function')
+    }
+    const nonTransformed = item || null;
+    return nonTransformed as any;
 }
 
 type IsString<T> = T extends string ? true : false;
+type IsUndefined<T> = T extends undefined ? true : false;
 
-type Transformer<T> = (item: T) => string;
+type TransformerToString<T> = (item: T) => string;
+type TransformerToType<T> = (item: string) => T;
 
-export function setItem<T>(key: string, value: T, transformer: IsString<T> extends true ? undefined : IsString<T> extends false ? Transformer<T> : never) {
+export function setItem<T>(key: string, value: T, transformer: IsString<T> extends true ? undefined : IsString<T> extends false ? TransformerToString<T> : never) {
     const transformValue: string = transformer ? transformer(value as T) : value as unknown as string;
     localStorage.setItem(key, transformValue);
 }
