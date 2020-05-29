@@ -7,14 +7,18 @@ export const useAuth = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        getCurrentUser().then(user => {
-            setUser(user);
-            setLoading(false);
-        }).catch((e) => {
-            setLoading(false);
-            setUser(null);
-            setError(e.message);
-        });
+        const asyncFn = async () => {
+            try {
+                const user = await getCurrentUser({ useCache: true });
+                setUser(user);
+                setLoading(false);
+            } catch (e) {
+                setLoading(false);
+                setUser(null);
+                setError(e.message);
+            }
+        }
+        asyncFn();
     }, [setUser, setError, setLoading]);
     return { user, loading, error };
 };

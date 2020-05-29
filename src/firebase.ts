@@ -5,11 +5,13 @@ import "firebase/firestore";
 import 'firebase/storage';
 
 
-import { DBUser } from "./types/auth";
+import { DBUser, FireBaseDBUser, Subject } from "./types/auth";
 import { setItem, getItem, removeItem } from "./utils/localstorage";
 import { assertEqual } from "./utils/assert";
 import { getHalfYear } from "./utils/date";
 import { DocContentTypes } from "./utils/docs";
+import { isUserLike } from "./utils/auth";
+import I18nError from "./utils/error";
 
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_API_KEY,
@@ -25,6 +27,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const firestore = firebase.firestore();
 
+const usersCollection = firestore.collection('/users');
+
+
 const storage = firebase.storage();
 
 function getAnalytics() {
@@ -38,58 +43,70 @@ export async function signInWithEmailAndPassword(email: string, password: string
     const entrypted = btoa(password);
     getAnalytics()?.logEvent('login', { email, password });
 
-    let data: DBUser;
-    const doc = firestore.collection('/users').doc(email);
+    const doc = usersCollection.doc(email);
     const snapshot = await doc.get();
-    data = snapshot.data() as DBUser;
+    const data = snapshot.data() as FireBaseDBUser;
+
+    const subjects = await Promise.all((data.subjects!).map(async (snapshot) => {
+        const subjectData = await snapshot.get();
+        const subject = subjectData.data() as Omit<Subject, 'name'>;
+        return { ...subject, name: subjectData.id };
+    })
+    );
+    const user = { ...data, subjects } as DBUser;
 
     if (!data) {
-        throw new Error('cannot sign-in non existed user');
+        throw new I18nError('SignIn.NonExistedUser');
     }
     if (data.password !== entrypted) {
-        throw new Error('password is incorrect');
+        throw new I18nError('SignIn.IncorrectPassword');
     }
 
     await doc.update({ lastLoginAt: Date.now() });
 
-    setItem('user', data, JSON.stringify);
-
-    return data as DBUser || null;
+    setItem('user', user, JSON.stringify);
 }
 
 export async function createUserWithEmailAndPassword(user: DBUser) {
     const encrypted = btoa(user.password);
     getAnalytics()?.logEvent('sign_up', user);
-    const doc = firestore.collection('/users').doc(user.email);
+    const doc = usersCollection.doc(user.email);
     const snapshot = await doc.get();
     if (snapshot.exists) {
-        throw new Error('cannot create an existed user');
+        throw new I18nError('SignUp.UserExists', 'cannot create an existed user');
     } else {
         await doc.set({ ...user, password: encrypted });
     }
 }
+type CurrentUserSettings = {
+    useCache?: boolean;
+}
+export async function getCurrentUser({ useCache }: CurrentUserSettings) {
+    const item = getItem<DBUser>('user', JSON.parse);
 
-export async function getCurrentUser(): Promise<DBUser | null> {
-    const item = getItem<DBUser>('user', JSON.parse as (text: string) => any);
     if (!item) {
         throw new Error('cannot get non-authorized user');
     }
+    if (!isUserLike(item)) {
+        console.warn(`localstorage by 'user' key is not a user like. Fetch from Firestore.`);
+        removeItem('user');
+    } else if (isUserLike(item) && useCache) {
+        return item;
+    }
     let shanpshot: DBUser;
 
+    const doc = usersCollection.doc(item.email);
+    const snapshot = await doc.get();
+    shanpshot = snapshot.data() as DBUser;
+
     try {
-        const doc = firestore.collection('/users').doc(item.email);
-        const snapshot = await doc.get();
-        shanpshot = snapshot.data() as DBUser;
+        assertEqual(item, shanpshot, ['lastLoginAt']);
     } catch (e) {
-
-    }
-
-    try {
-        assertEqual(item, shanpshot!);
+        console.warn(e.message);
     } finally {
         setItem('user', shanpshot!, JSON.stringify);
     }
-    return item;
+    return shanpshot;
 }
 
 export async function updateUserProfile(user: DBUser) {
@@ -103,7 +120,7 @@ export function signOut() {
 }
 
 export async function saveXlsx(data: Blob | Uint8Array | ArrayBuffer) {
-    const currentUser = await getCurrentUser();
+    const currentUser = await getCurrentUser({ useCache: false });
     const now = new Date();
 
     const halfYear = getHalfYear(now);

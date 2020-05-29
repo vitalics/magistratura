@@ -17,6 +17,7 @@ import Alert from '@material-ui/lab/Alert';
 import { createUserWithEmailAndPassword } from '../firebase';
 import routes from '../routes';
 import { useAuth } from '../hooks/auth';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -47,7 +48,7 @@ export default React.memo(() => {
   const [error, setError] = React.useState('');
 
   const history = useHistory();
-
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   React.useEffect(() => {
@@ -65,18 +66,18 @@ export default React.memo(() => {
       setError(err.message);
       throw err;
     }
-    if (!lastname){
+    if (!lastname) {
       const err = new Error('lastname field is required');
       setError(err.message);
       throw err;
     }
 
-      try {
-        await createUserWithEmailAndPassword({ firstname, lastname, lastLoginAt: Date.now(), email, dateOfBirth: null, phone: null, role: 'teacher', skype: null, photoUrl: null, password })
-        history.push('/');
-      } catch (e) {
-        setError(e.message);
-      }
+    try {
+      await createUserWithEmailAndPassword({ firstname, lastname, lastLoginAt: Date.now(), email, dateOfBirth: null, phone: null, roles: ['Professor'], skype: null, photoUrl: null, password, department: 'ASU', degrees: [], subjects: null })
+      history.push('/');
+    } catch (e) {
+      setError(e.message);
+    }
   }, [firstname, lastname, email, password, history])
 
   return (
@@ -87,7 +88,7 @@ export default React.memo(() => {
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Sign up
+          {t('Sign Up')}
         </Typography>
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
@@ -99,7 +100,7 @@ export default React.memo(() => {
                 required
                 fullWidth
                 id="firstName"
-                label="First Name"
+                label={t("First Name")}
                 autoFocus
                 value={firstname}
                 onChange={e => setFirstname(e.target.value)}
@@ -111,7 +112,7 @@ export default React.memo(() => {
                 required
                 fullWidth
                 id="lastName"
-                label="Last Name"
+                label={t("Last Name")}
                 name="lastName"
                 autoComplete="lname"
                 value={lastname}
@@ -124,7 +125,7 @@ export default React.memo(() => {
                 required
                 fullWidth
                 id="email"
-                label="Email Address"
+                label={t("Email Address")}
                 name="email"
                 type="email"
                 autoComplete="email"
@@ -138,7 +139,7 @@ export default React.memo(() => {
                 required
                 fullWidth
                 name="password"
-                label="Password"
+                label={t("Password")}
                 type="password"
                 id="password"
                 autoComplete="current-password"
@@ -149,7 +150,7 @@ export default React.memo(() => {
           </Grid>
 
           {error &&
-            <Alert severity="error">{error}</Alert>
+            <Alert severity="error">{t(error)}</Alert>
           }
 
           <Button
@@ -160,12 +161,12 @@ export default React.memo(() => {
             className={classes.submit}
             onClick={handleSignUp}
           >
-            Sign Up
+            {t('Sign Up.Action')}
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
-              <Link href={routes.SIGN_UP} variant="body2">
-                Already have an account? Sign in
+              <Link href={routes.SIGN_IN} variant="body2">
+                {t('Already have an account')}? {t('Sign In')}
               </Link>
             </Grid>
           </Grid>

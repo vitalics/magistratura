@@ -19,6 +19,7 @@ import { signInWithEmailAndPassword } from '../firebase';
 
 import * as ROUTES from '../routes';
 import { useAuth } from '../hooks/auth';
+import { useTranslation } from 'react-i18next';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -53,7 +54,7 @@ export default React.memo(() => {
   const [error, setError] = React.useState('');
 
   const { user } = useAuth();
-
+  const { t } = useTranslation();
   const history = useHistory();
 
   React.useEffect(() => {
@@ -70,7 +71,7 @@ export default React.memo(() => {
 
     try {
       await signInWithEmailAndPassword(email, password);
-      history.push(ROUTES.HOME);
+      history.push(ROUTES.MAIN);
     } catch (e) {
       setError(e.message);
     }
@@ -89,8 +90,8 @@ export default React.memo(() => {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign in
-        </Typography>
+            {t('SignIn.Header')}
+          </Typography>
           <form className={classes.form}>
             <TextField
               variant="outlined"
@@ -99,7 +100,7 @@ export default React.memo(() => {
               fullWidth
               type="email"
               id="email"
-              label="Email Address"
+              label={t('Email')}
               name="email"
               autoComplete="email"
               autoFocus
@@ -112,7 +113,7 @@ export default React.memo(() => {
               required
               fullWidth
               name="password"
-              label="Password"
+              label={t('Password')}
               type="password"
               id="password"
               autoComplete="current-password"
@@ -127,29 +128,22 @@ export default React.memo(() => {
               className={classes.submit}
               onClick={handleSignIn}
             >
-              Sign In
-          </Button>
+              {t('SignIn.Action')}
+            </Button>
 
             {error &&
               <Alert severity="error">{error}</Alert>
             }
-
-            {/* <div>
-              <Button className={classes.provider} onClick={handleGoogleSignIn}>
-                Sign in with google
-                  <img src="https://www.gstatic.com/mobilesdk/160512_mobilesdk/auth_service_google.svg" alt="google" />
-              </Button>
-            </div> */}
             <Grid container>
               <Grid item xs>
                 <Link href="#" variant="body2">
-                  Forgot password?
+                  {t('Forgot password')}?
               </Link>
               </Grid>
               <Grid item>
                 <Link href="/sign-up" variant="body2">
-                  Don't have an account? Sign Up
-              </Link>
+                  {t('Dont have an account')}? {t('Sign Up')}
+                </Link>
               </Grid>
 
             </Grid>

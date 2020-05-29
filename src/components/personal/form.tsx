@@ -12,6 +12,7 @@ import fns from '@date-io/date-fns';
 
 import classnames from 'classnames';
 import { DBUser } from '../../types/auth';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -28,19 +29,20 @@ type Props = {
 const dateUtils = new fns();
 export default function PersonalForm({ className, user, readonly, onUserChange }: Props) {
     const classes = useStyles();
+    const { t } = useTranslation();
     return (
         <Paper classes={{
             root: classnames(classes.root, className)
         }}>
             <Typography variant="h6" gutterBottom>
-                Личная информация
+                {t('Personal Info')}
             </Typography>
             <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                     <TextField
                         id="firstName"
                         name="firstName"
-                        label="First name"
+                        label={t('First Name')}
                         fullWidth
                         autoComplete="given-name"
                         value={user.firstname}
@@ -50,7 +52,7 @@ export default function PersonalForm({ className, user, readonly, onUserChange }
                     <TextField
                         id="lastName"
                         name="lastName"
-                        label="Last name"
+                        label={t('Last Name')}
                         fullWidth
                         autoComplete="family-name"
                         value={user.lastname}
@@ -61,7 +63,7 @@ export default function PersonalForm({ className, user, readonly, onUserChange }
                         required
                         id="email"
                         name="email"
-                        label="Email"
+                        label={t('Email')}
                         fullWidth
                         autoComplete="shipping address-line1"
                         value={user.email}
@@ -71,7 +73,7 @@ export default function PersonalForm({ className, user, readonly, onUserChange }
                     <TextField
                         id="skype"
                         name="skype"
-                        label="Skype"
+                        label={t('Skype')}
                         fullWidth
                         autoComplete="shipping address-line2"
                         value={user.skype ?? ''}
@@ -81,7 +83,7 @@ export default function PersonalForm({ className, user, readonly, onUserChange }
                     <TextField
                         id="mobile"
                         name="mobile"
-                        label="mobile"
+                        label={t('Mobile')}
                         fullWidth
                         value={user.phone ?? ''}
                     />
@@ -90,8 +92,8 @@ export default function PersonalForm({ className, user, readonly, onUserChange }
                     <TextField
                         id="lastLogin"
                         name="lastLogin"
-                        label="Дата входа"
-                        value={user.lastLoginAt ? dateUtils.format(new Date(user.lastLoginAt), 'fullDateTime24h'): dateUtils.format(new Date(), 'fullDateTime24h')}
+                        label={t('Last Login At')}
+                        value={user.lastLoginAt ? dateUtils.format(new Date(user.lastLoginAt), 'fullDateTime24h') : dateUtils.format(new Date(), 'fullDateTime24h')}
                     />
                 </Grid>
             </Grid>

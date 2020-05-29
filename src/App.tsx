@@ -16,7 +16,8 @@ import * as ROUTES from './routes';
 import { useAuth } from './hooks/auth';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { getItem } from './utils/localstorage';
-import { dark,  } from '@material-ui/core/styles/createPalette';
+import { dark, } from '@material-ui/core/styles/createPalette';
+import { useTranslation } from 'react-i18next';
 
 const lightTheme = createMuiTheme();
 const darkTheme = createMuiTheme({
@@ -27,7 +28,16 @@ const darkTheme = createMuiTheme({
 
 export default React.memo(() => {
   const { user } = useAuth();
+  const { i18n } = useTranslation();
   const [themeType, setThemeType] = React.useState<'dark' | 'light'>('light')
+
+  React.useEffect(() => {
+    const lang = getItem('i18nextLng');
+
+    if (lang) {
+      i18n.changeLanguage(lang);
+    }
+  }, [i18n]);
 
   React.useEffect(() => {
     const theme = getItem<'dark' | 'light'>('theme');

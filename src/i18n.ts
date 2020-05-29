@@ -1,6 +1,5 @@
 import i18n, { Resource } from "i18next";
 import { initReactI18next } from "react-i18next";
-import LanguageDetector from 'i18next-browser-languagedetector';
 import Backend from 'i18next-http-backend';
 
 import translationEN from './locales/en/translation.json';
@@ -18,13 +17,9 @@ const resources: Resource = {
 
 i18n
     .use(Backend)
-    .use(LanguageDetector)
     .use(initReactI18next) // passes i18n down to react-i18next
     .init({
         resources,
-        detection: {
-            lookupLocalStorage: 'i18nextLng',
-        },
         lng: "en",
         fallbackLng: ["en", "ru"],
 
