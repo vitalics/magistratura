@@ -7,7 +7,7 @@ import Table from '../components/xlsx/table';
 type Props = {
     onThemeChanged?: (themeType: 'dark' | 'light') => void;
 };
-export default React.memo(({ onThemeChanged }: Props) => {
+export default function Home({ onThemeChanged }: Props) {
     return (
         <>
             <Header onThemeChanged={onThemeChanged} />
@@ -15,4 +15,4 @@ export default React.memo(({ onThemeChanged }: Props) => {
             <Table />
         </>
     );
-});
+};

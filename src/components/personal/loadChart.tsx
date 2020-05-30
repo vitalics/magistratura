@@ -1,20 +1,25 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import CircularProgress from '@material-ui/core/CircularProgress'
 import Chart from 'react-google-charts';
 import { makeStyles } from '@material-ui/core';
 
+import classnames from 'classnames';
+
 import { random } from '../../utils/math';
 import { getHalfYearAsNumber } from '../../utils/date';
-import { useTranslation } from 'react-i18next';
-import { dark } from '@material-ui/core/styles/createPalette';
 
 const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(2),
   },
 }));
-export default function LoadChart() {
+
+type Props = {
+  className?: string
+}
+export default function PersonalLoadChart({ className }: Props) {
   const classes = useStyles();
   const now = new Date();
 
@@ -22,7 +27,7 @@ export default function LoadChart() {
 
   return (
     <Chart
-      className={classes.root}
+      className={classnames(classes.root, className)}
       chartType="Bar"
       loader={<CircularProgress />}
       data={[
@@ -37,10 +42,9 @@ export default function LoadChart() {
       options={{
         // Material design options
         chart: {
-          title: t('Personal.Chart.Load.Title', { halfYear: getHalfYearAsNumber(now) }),
+          title: t('Personal.Chart.Load.Title', { count: getHalfYearAsNumber(now) }),
           subtitle: t('Personal.Chart.Load.SubTitle'),
         },
-        backgroundColor: dark.background.default
       }}
 
       // For tests

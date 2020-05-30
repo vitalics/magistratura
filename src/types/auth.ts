@@ -1,4 +1,5 @@
 export type DBUser = {
+    uid: string;
     email: string;
     password: string;
     firstname: string | null;
@@ -11,18 +12,14 @@ export type DBUser = {
     phone: string | null;
     lastLoginAt: number | null;
     degrees: Degree[];
-    subjects: Subject[] | null;
+    subjects: string[] | null;
 };
 
 export type FireBaseDBUser = Omit<DBUser, 'subjects'> & {
     subjects: firebase.firestore.DocumentReference[]
 };
 
-export type Subject = {
-    name: string;
-    theoretical: number;
-    practice: number;
-}
+export type Subject = string;
 
 type Role =
     | 'Professor'
@@ -32,7 +29,7 @@ type Role =
     | 'Admin';
 
 type Department =
-    | 'ASU' // Automatic control system (ASU)
+    | 'automatedcontrolsystems' // Automatic control system (ASU)
 
 type Degree =
     | 'Bachelor'

@@ -36,3 +36,7 @@ export function getHalfYearAsNumber(date:Date){
         return 2;
     }
 }
+
+export function isValidDate(date: unknown): date is Date {
+    return date instanceof Date && !isNaN(+date);
+}

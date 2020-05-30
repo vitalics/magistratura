@@ -79,11 +79,21 @@ export default function LanguadgeSelector() {
                     </div>
                 </Button>
             </div>
-            <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
+            <Popper
+                open={open}
+                anchorEl={anchorRef.current}
+                role={undefined}
+                transition
+                disablePortal
+                // anchorOrigin={{
+                //     vertical: 'top',
+                //     horizontal: 'left',
+                // }}
+                >
                 {({ TransitionProps, placement }) => (
                     <Grow
                         {...TransitionProps}
-                        style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
+                        style={{ transformOrigin: placement === 'bottom' ? 'top top' : 'center bottom' }}
                     >
                         <Paper>
                             <ClickAwayListener onClickAway={handleClose}>

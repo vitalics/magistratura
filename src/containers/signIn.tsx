@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-export default React.memo(() => {
+export default function SignIn() {
   const classes = useStyles();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -71,15 +71,11 @@ export default React.memo(() => {
 
     try {
       await signInWithEmailAndPassword(email, password);
-      history.push(ROUTES.MAIN);
+      history.push(ROUTES.HOME);
     } catch (e) {
       setError(e.message);
     }
-  }, [email, password, history]);
-
-  const handleEmail = React.useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setEmail(e.target.value);
-  }, []);
+  }, [email, history, password]);
 
   return (
     <>
@@ -105,7 +101,7 @@ export default React.memo(() => {
               autoComplete="email"
               autoFocus
               value={email}
-              onChange={handleEmail}
+              onChange={e => setEmail(e.target.value)}
             />
             <TextField
               variant="outlined"
@@ -152,4 +148,4 @@ export default React.memo(() => {
       </Container>
     </>
   );
-});
+};

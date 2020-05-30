@@ -6,7 +6,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import { signOut } from '../firebase';
-import routes from '../routes';
+import routes, { PROFILE } from '../routes';
 
 export default function AuthIcon() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -27,7 +27,7 @@ export default function AuthIcon() {
   const handleProfile = React.useCallback(
     () => {
       setAnchorEl(null);
-      history.push(routes.PROFILE);
+      history.push(PROFILE);
     }, [setAnchorEl, history]);
 
   const handleSignOut = React.useCallback(() => {

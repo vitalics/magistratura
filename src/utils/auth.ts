@@ -3,6 +3,7 @@ import { DBUser } from "../types/auth";
 export function isUserLike(value: unknown): value is DBUser {
     if (typeof value === 'object' && value) {
         return (
+            isHavePropAndExist(value, 'uid') &&
             isHavePropAndExist(value, 'email') &&
             isHavePropAndExist(value, 'password') &&
             isHavePropAndExist(value, 'department')

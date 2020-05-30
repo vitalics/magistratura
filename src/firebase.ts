@@ -5,7 +5,7 @@ import "firebase/firestore";
 import 'firebase/storage';
 
 
-import { DBUser, FireBaseDBUser, Subject } from "./types/auth";
+import { DBUser, FireBaseDBUser } from "./types/auth";
 import { setItem, getItem, removeItem } from "./utils/localstorage";
 import { assertEqual } from "./utils/assert";
 import { getHalfYear } from "./utils/date";
@@ -43,36 +43,30 @@ export async function signInWithEmailAndPassword(email: string, password: string
     const entrypted = btoa(password);
     getAnalytics()?.logEvent('login', { email, password });
 
-    const doc = usersCollection.doc(email);
-    const snapshot = await doc.get();
-    const data = snapshot.data() as FireBaseDBUser;
+    const { user } = await getUserByEmail(email);
 
-    const subjects = await Promise.all((data.subjects!).map(async (snapshot) => {
-        const subjectData = await snapshot.get();
-        const subject = subjectData.data() as Omit<Subject, 'name'>;
-        return { ...subject, name: subjectData.id };
-    })
-    );
-    const user = { ...data, subjects } as DBUser;
-
-    if (!data) {
+    if (!user) {
         throw new I18nError('SignIn.NonExistedUser');
     }
-    if (data.password !== entrypted) {
+
+    if (user.password !== entrypted) {
         throw new I18nError('SignIn.IncorrectPassword');
     }
 
-    await doc.update({ lastLoginAt: Date.now() });
+    // TODO: lastLoginAt
+    // const doc = (await usersCollection.where('email', '==', user.email).limit(1).get()).docs[0];
+
+    // await doc.({ lastLoginAt: Date.now() });
 
     setItem('user', user, JSON.stringify);
 }
 
-export async function createUserWithEmailAndPassword(user: DBUser) {
+export async function createUserWithEmailAndPassword(user: Omit<DBUser, 'uid'>) {
     const encrypted = btoa(user.password);
     getAnalytics()?.logEvent('sign_up', user);
-    const doc = usersCollection.doc(user.email);
-    const snapshot = await doc.get();
-    if (snapshot.exists) {
+    const doc = usersCollection.doc();
+    const { user: snapshot } = await getUserByEmail(user.email);
+    if (snapshot) {
         throw new I18nError('SignUp.UserExists', 'cannot create an existed user');
     } else {
         await doc.set({ ...user, password: encrypted });
@@ -81,8 +75,25 @@ export async function createUserWithEmailAndPassword(user: DBUser) {
 type CurrentUserSettings = {
     useCache?: boolean;
 }
+
+async function getUserByEmail(email: string): Promise<{ userId: string, user: DBUser | null }> {
+    const userDoc = (await usersCollection.where('email', '==', email).limit(1).get()).docs[0]
+    const userId = userDoc.id;
+    const dbUser: FireBaseDBUser | null = userDoc.data() as FireBaseDBUser | null;
+
+    // map subjects if exists
+    let subjects: string[] = [];
+    if (dbUser && dbUser.subjects && dbUser.subjects.length > 0) {
+        subjects = await Promise.all((dbUser.subjects).map(async (snapshot) => {
+            const subjectData = await snapshot.get();
+            return subjectData.id;
+        }));
+    }
+    const user: DBUser = Object.assign(dbUser, { subjects, uid: userId });
+    return { userId, user };
+}
 export async function getCurrentUser({ useCache }: CurrentUserSettings) {
-    const item = getItem<DBUser>('user', JSON.parse);
+    const item = getItem('user', JSON.parse);
 
     if (!item) {
         throw new Error('cannot get non-authorized user');
@@ -93,26 +104,24 @@ export async function getCurrentUser({ useCache }: CurrentUserSettings) {
     } else if (isUserLike(item) && useCache) {
         return item;
     }
-    let shanpshot: DBUser;
 
-    const doc = usersCollection.doc(item.email);
-    const snapshot = await doc.get();
-    shanpshot = snapshot.data() as DBUser;
+    // first time
+    const { user, userId } = await getUserByEmail(item.email);
 
     try {
-        assertEqual(item, shanpshot, ['lastLoginAt']);
+        assertEqual(item, user!, ['lastLoginAt']);
     } catch (e) {
         console.warn(e.message);
     } finally {
-        setItem('user', shanpshot!, JSON.stringify);
+        setItem('user', { ...user, userId }!, JSON.stringify);
     }
-    return shanpshot;
+    return user!;
 }
 
 export async function updateUserProfile(user: DBUser) {
     setItem('user', user, JSON.stringify);
-    const doc = firestore.collection('/users').doc(user.email);
-    await doc.set(user, { merge: true });
+    const { userId } = await getUserByEmail(user.email);
+    usersCollection.doc(userId).set(user, { merge: true })
 }
 
 export function signOut() {
@@ -141,13 +150,51 @@ export async function getCurrentXlsx() {
     const ref = storage.ref(`${now.getFullYear()}/${halfYear}/load.xlsx`);
     const url: string = await ref.getDownloadURL();
 
-    console.log('getCurrentXlsx', url)
-
     const data = await fetch(url, {
         method: "GET",
-        mode: 'no-cors'
+        mode: "no-cors"
     });
+
     const blob = await data.blob();
-    return blob;
+    return { url, blob };
 }
 
+type DepartmentSettings = {
+    includeMySelf?: boolean;
+}
+
+export async function getUsersByDepartment({ includeMySelf }: DepartmentSettings) {
+    const user = await getCurrentUser({ useCache: true });
+    const usersDepartment = usersCollection.where('department', '==', user.department)
+
+    const docs = (await usersDepartment.get()).docs;
+
+    const users: DBUser[] = await Promise.all(docs.map(async doc => {
+        const data = doc.data() as Omit<DBUser, 'uid'>;
+        const uid = doc.id;
+        return { ...data, uid };
+    }));
+    if (!includeMySelf) {
+        return users.filter(dbUser => dbUser.email !== user.email);
+    }
+    return users;
+}
+
+export async function getUserById(id: string): Promise<DBUser> {
+    const userDoc = await usersCollection.doc(id).get()
+    const user = userDoc.data() as FireBaseDBUser;
+
+    let subjects: string[] = [];
+    if (user && user.subjects && user.subjects.length > 0) {
+        subjects = await Promise.all(user.subjects.map(async snapshot => {
+            const subjectData = await snapshot.get();
+            return subjectData.id;
+        }))
+    }
+
+    if (!user) {
+        throw new I18nError('SignIn.NonExistedUser');
+    }
+
+    return { ...user, subjects, uid: id };
+}

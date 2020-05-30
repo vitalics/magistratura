@@ -13,7 +13,7 @@ export default function Table(props: Props) {
 
             console.log('table views', jsonData)
         })
-    }, [])
+    }, []);
 
     return (
         <>Hello</>

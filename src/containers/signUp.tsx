@@ -73,7 +73,22 @@ export default React.memo(() => {
     }
 
     try {
-      await createUserWithEmailAndPassword({ firstname, lastname, lastLoginAt: Date.now(), email, dateOfBirth: null, phone: null, roles: ['Professor'], skype: null, photoUrl: null, password, department: 'ASU', degrees: [], subjects: null })
+      await createUserWithEmailAndPassword({
+        firstname,
+        lastname,
+        lastLoginAt: Date.now(),
+        email,
+        dateOfBirth:
+          null,
+        phone: null,
+        roles: ['Professor'],
+        skype: null,
+        photoUrl: null,
+        password,
+        department: 'automatedcontrolsystems',
+        degrees: [],
+        subjects: null
+      })
       history.push('/');
     } catch (e) {
       setError(e.message);
