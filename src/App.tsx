@@ -17,6 +17,7 @@ import SignUp from './containers/signUp';
 import ProfileInfo from './containers/profile';
 import Home from './containers/home';
 import User from './containers/user';
+import Load from './containers/load';
 
 import PrivateRoute from './components/auth/private';
 import ProtectedRoute from './components/auth/protected';
@@ -63,8 +64,11 @@ export default React.memo(() => {
               <PrivateRoute path={ROUTES.HOME}>
                 <Home onThemeChanged={type => setThemeType(type)} />
               </PrivateRoute>
+              <PrivateRoute path={ROUTES.LOAD}>
+                <Load />
+              </PrivateRoute>
               <PrivateRoute exact path={ROUTES.MAIN}>
-                <Home onThemeChanged={type => setThemeType(type)} />
+                <Redirect to={ROUTES.HOME} />
               </PrivateRoute>
               <Route path="*">
                 <Redirect to={ROUTES.HOME} />

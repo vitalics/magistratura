@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }: React.PropsWithChildren<{}>) => {
     const [isAuthentificated, setAuthentificated] = React.useState(false);
 
     React.useEffect(() => {
-        getCurrentUser({ useCache: true }).then(user => {
+        getCurrentUser({ useCache: false }).then(user => {
             setUser(user);
             setLoading(false);
             setAuthentificated(true);

@@ -19,7 +19,7 @@ export type FireBaseDBUser = Omit<DBUser, 'subjects'> & {
     subjects: firebase.firestore.DocumentReference[]
 };
 
-export type Subject = string;
+export type Subject = 'computer science';
 
 type Role =
     | 'Professor'

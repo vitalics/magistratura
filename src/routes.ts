@@ -5,6 +5,7 @@ export const HOME = '/home';
 export const PROFILE = '/profile';
 export const USERS = '/users';
 export const USER = '/users/:id';
+export const LOAD = '/load';
 export const GETUSER = (id: string) => `/users/${id}`;
 
 export default {
@@ -16,4 +17,5 @@ export default {
     USERS,
     USER,
     GETUSER,
+    LOAD,
 } as const;

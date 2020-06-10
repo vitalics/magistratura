@@ -18,7 +18,6 @@ import PersonalCard from '../components/personal/card';
 import { getUsersByDepartment } from '../firebase';
 import { DBUser } from '../types/auth';
 import UsersInDepartmentList from '../components/personal/departmentUserList';
-import { useParams } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   personalForm: {
@@ -66,7 +65,7 @@ export default function ProfileInfo({ onThemeChanged, user: anotherUser, title, 
     };
 
     asyncFn();
-  }, [anotherUser, user]);
+  }, [anotherUser, user, userLoading]);
 
   return (
     <div>

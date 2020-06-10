@@ -36,7 +36,7 @@ export default function SubjectsTable({ subjects }: Props) {
                     </TableHead>
                     <TableBody>
                         {subjects.map(subject =>
-                            <TableRow key={subject}>    
+                            <TableRow key={subject}>
                                 <TableCell component="th" scope="row" align="center">
                                     {t(`Subjects.${subject}`)}
                                 </TableCell>

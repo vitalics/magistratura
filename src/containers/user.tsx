@@ -4,7 +4,6 @@ import { useParams } from 'react-router-dom';
 import { getUserById } from '../firebase';
 import { DBUser } from '../types/auth';
 import ProfileInfo from './profile';
-import { useTranslation } from 'react-i18next';
 
 type Props = {
     onThemeChanged?: (theme: 'light' | 'dark') => void;
@@ -14,8 +13,6 @@ export default function User({ onThemeChanged }: Props) {
 
     const [user, setUser] = React.useState<DBUser | null>(null);
     const [error, setError] = React.useState('');
-
-    const { t } = useTranslation();
 
     React.useEffect(() => {
         const asyncFn = async () => {

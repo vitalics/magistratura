@@ -12,6 +12,7 @@ import { getHalfYear } from "./utils/date";
 import { DocContentTypes } from "./utils/docs";
 import { isUserLike } from "./utils/auth";
 import I18nError from "./utils/error";
+import { PerfUser } from "./components/load/prefessors";
 
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_API_KEY,
@@ -28,6 +29,7 @@ firebase.initializeApp(firebaseConfig);
 const firestore = firebase.firestore();
 
 const usersCollection = firestore.collection('/users');
+const subjectsCollection = firestore.collection('/subjects');
 
 
 const storage = firebase.storage();
@@ -121,7 +123,7 @@ export async function getCurrentUser({ useCache }: CurrentUserSettings) {
 export async function updateUserProfile(user: DBUser) {
     setItem('user', user, JSON.stringify);
     const { userId } = await getUserByEmail(user.email);
-    usersCollection.doc(userId).set(user, { merge: true })
+    usersCollection.doc(userId).set(user, { merge: true });
 }
 
 export function signOut() {
@@ -197,4 +199,18 @@ export async function getUserById(id: string): Promise<DBUser> {
     }
 
     return { ...user, subjects, uid: id };
+}
+
+export async function getSubjects() {
+    const subjects = (await subjectsCollection.get()).docs;
+    return subjects.map(subject => subject.id);
+}
+
+export async function syncUserWithSubjects(users: PerfUser[]) {
+    return await Promise.all(users.map(async user => {
+        const subjects = user.subjects.map(subject => (firestore.doc(`/subjects/${subject.name}`)));
+        usersCollection.doc(user.userId).set({ subjects, }, { merge: true });
+        // const userNeedToUpdate: FireBaseDBUser | null = (await usersCollection.where('uid', '==', user.userId).get()).docs[0].data();
+        // userNeedToUpdate.
+    }));
 }
